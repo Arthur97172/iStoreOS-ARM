@@ -90,9 +90,8 @@ if [ -d "/etc/banner1" ]; then
 fi
 
 # 设置作者描述信息
-# 修改关键：将 "24.10.4" 替换为 "版本号" 占位符，或者保持为 iStoreOS 后面接任意内容
 FILE_PATH="/etc/openwrt_release"
-NEW_DESCRIPTION="iStoreOS 版本号"
+NEW_DESCRIPTION="iStoreOS __VERSION__"
 sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
 
 exit 0
