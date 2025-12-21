@@ -29,9 +29,9 @@
 
 | 插件                     | 状态 | 插件                     | 状态  | 插件                    | 状态   |
 |:------------------------:|:----:|:------------------------:|:-----:|:------------------------:|:------:|
-| ramfree释放内存          | ✅   | luci-app-amlogic         | ✅    | FileBrowser文件浏览器    |  ✅     |
-| adguardhome              |  ✅   | lucky                    |  ✅     | openlist2                | ✅      |
-| poweroff              |  ✅   | 其他 N/A                    |  ⏳     | N/A            | ⭕       |
+| Famfree          | ✅   | Luci-app-amlogic         | ✅    | FileBrowser    |  ✅     |
+| Adguardhome              |  ✅   | Lucky                    |  ✅     | Openlist2                | ✅      |
+| Poweroff              |  ✅   | N/A                    |  ⏳     | N/A            | ⭕       |
 
 
 ✅ 支持 - ⏳ 计划中 - ⭕ 不支持
