@@ -4,11 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       build_version:
-        description: "请选择构建版本"
+        description: "请选择构建版本 (latest 为官网最新)"
         required: true
-        default: '20251205'
+        default: 'latest' # 默认设为 latest
         type: choice
         options:
+          - 'latest'
           - '20251205'
           - '20251128'
           - '20251121'
@@ -92,7 +93,23 @@ jobs:
 
     - name: ⏬ 下载 ImageBuilder
       run: |
-        curl -L -o imagebuilder.tar.zst https://github.com/Arthur97172/iStoreOS-ARM/releases/download/iStoreOS-Imagebuilder/${{ inputs.build_version }}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst
+        BUILD_VER="${{ inputs.build_version }}"
+        
+        # 逻辑判断
+        if [ "$BUILD_VER" = "latest" ]; then
+          echo "🚀 模式：下载官网最新版 (latest)..."
+          URL="https://fw0.koolcenter.com/iStoreOS/ib/armsr/istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+        else
+          echo "📂 模式：下载指定备份版本 ($BUILD_VER)..."
+          URL="https://github.com/${{ github.repository }}/releases/download/iStoreOS-Imagebuilder/${BUILD_VER}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+        fi
+
+        echo "正在从以下地址下载: $URL"
+        
+        # 执行下载
+        curl -Lf -o imagebuilder.tar.zst "$URL" || { echo "❌ 下载失败，请检查版本 $BUILD_VER 的链接是否存在"; exit 1; }
+
+        # 解压并重命名
         tar --use-compress-program=unzstd -xvf imagebuilder.tar.zst
         mv istoreos-imagebuilder-* imagebuilder
 
