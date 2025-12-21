@@ -1,7 +1,8 @@
 <div align="center">
   <img src="./files/screenshot/istoreos.png" style="max-width: 100%; height: auto;" />
-  <h1>基于iStoreOS Imagebuilder与Armbian ophub打包工具的ARM构架的iStoreOS固件</h1>
-
+  <h1>基于iStoreOS Imagebuilder与Armbian ophub打包工具</h1>
+  <h1>ARM构架的iStoreOS固件</h1>
+  
   <img src="https://img.shields.io/github/downloads/Arthur97172/iStoreOS-ARM/total.svg?style=for-the-badge&color=32C955"/>
   <img src="https://img.shields.io/github/stars/Arthur97172/iStoreOS-ARM.svg?style=for-the-badge&color=orange"/>
   <img src="https://img.shields.io/github/forks/Arthur97172/iStoreOS-ARM.svg?style=for-the-badge&color=ff69b4"/>
