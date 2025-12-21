@@ -83,7 +83,7 @@ jobs:
         fi
 
         # 3. 替换脚本末尾的描述信息
-        sed -i "s/24.10.4/${{ env.VERSION }}/g" "$CONFIG_PATH"
+        sed -i "s/VERXXXX/${{ env.VERSION }}/g" "$CONFIG_PATH"
         
         echo "✅ 配置修改完成，输出预览："
         cat "$CONFIG_PATH"
