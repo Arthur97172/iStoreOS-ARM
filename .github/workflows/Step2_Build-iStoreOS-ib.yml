@@ -6,10 +6,15 @@ on:
       openwrt_board:
         description: "请选择设备型号（默认当前常见设备）"
         required: true
-        default: "a311d-oes_s905d_wxy-oect_jp-tvbox_s922x-oes-plus_fine3399_sv-33a6x_dg3399_dg-tn3568_smart-am40_smart-am60_sw799_king3399_panther-x2_firefly-rk3399_s905l3a_nsy-g16-plus_nsy-g68-plus_bdy-g18-pro"
+        default: "all"
         type: choice
         options:
-          - a311d-oes_s905d_wxy-oect_jp-tvbox_s922x-oes-plus_fine3399_sv-33a6x_dg3399_dg-tn3568_smart-am40_smart-am60_sw799_king3399_panther-x2_firefly-rk3399_s905l3a_nsy-g16-plus_nsy-g68-plus_bdy-g18-pro
+          - all
+          - top55
+          - after55
+          - a311d-oes_s922x-oes-plus_wxy-oect
+          - nsy-g16-plus_nsy-g68-plus_bdy-g18-pro
+          - s905d_s905x3_s912_s922x-ct2000
           - a311d
           - a311d-oes
           - alark35-3500
