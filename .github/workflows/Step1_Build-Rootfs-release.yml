@@ -65,28 +65,25 @@ jobs:
         CONFIG_PATH="./files/etc/uci-defaults/99-custom.sh"
         echo "当前网络配置路径: $CONFIG_PATH"
         
-        # 1. 替换版本号占位符
+        # 1. 精准替换版本占位符（不论你选什么版本，都只会替换 __VNAME__）
+        # 如果你的脚本中还有其他地方写了“版本号”，可以保留下面这一行
         sed -i "s/版本号/${{ env.VERSION }}/g" "$CONFIG_PATH"
-        [ -f "./files/etc/banner" ] && sed -i "s/版本号/${{ env.VERSION }}/g" "./files/etc/banner"
+        
+        # 2. 替换脚本末尾描述信息的占位符 (解决叠加问题的关键)
+        sed -i "s/__VNAME__/${{ env.VERSION }}/g" "$CONFIG_PATH"
+        
+        # 3. 处理 Banner (如果 banner 文件里也有占位符)
+        [ -f "./files/etc/banner" ] && sed -i "s/__VNAME__/${{ env.VERSION }}/g" "./files/etc/banner"
 
-        # 2. 网络逻辑配置 (关键修改点：不再删除行，改用关键词替换)
+        # 4. 网络逻辑配置 (保持不变)
         if [ "${{ inputs.network_settings }}" = "static" ]; then
            echo "模式：静态IP (旁路由)"
-           # 将脚本内默认的 192.168.10.1 替换为用户输入的 IP
            sed -i "s/192.168.10.1/${{ inputs.ipaddr }}/g" "$CONFIG_PATH"
-           
-           # 在设置 IP 的代码行后，动态插入网关和 DNS 设置
            sed -i "/uci set network.lan.ipaddr/a \        uci set network.lan.gateway='${{ inputs.gateway }}'\n        uci set network.lan.dns='${{ inputs.gateway }}'" "$CONFIG_PATH"
-        else
-           echo "模式：DHCP / 默认模式 (主路由)"
-           # 保持原脚本逻辑：单网口自动 DHCP，多网口保持 192.168.10.1
         fi
 
-        # 3. 替换脚本末尾的描述信息
-        sed -i "s/24.10.4/${{ env.VERSION }}/g" "$CONFIG_PATH"
-        
-        echo "✅ 配置修改完成，输出预览："
-        cat "$CONFIG_PATH"
+        echo "✅ 配置修改完成，脚本末尾预览："
+        tail -n 5 "$CONFIG_PATH"
 
     - name: ⏬ 安装依赖
       run: |
