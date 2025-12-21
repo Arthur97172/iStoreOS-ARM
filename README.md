@@ -24,17 +24,13 @@
 > [!TIP]
 > 😂此固件为 **非官方构建，不保证完全无BUG** ，请知悉😂
 > 
-> 😂若当前项目严重影响您的使用，欢迎您探索右侧项目😂👉👉👉[iStoreOS-Native](https://github.com/Kwonelee/iStoreOS-Native)
-> 
-> 使用此仓库必须设置机密token，Actions云构建固件时需要用到，通常在仓库设置里面。机密键名为 **`GH_TOKEN`**（严禁在仓库可视代码中填写，否则后果自负）
-
 ## 😅 第三方插件 [![](https://img.shields.io/badge/-第三方插件-FFFFFF.svg)](#-第三方插件-)
 <div align="center">
 
 | 插件                     | 状态 | 插件                     | 状态  | 插件                    | 状态   |
 |:------------------------:|:----:|:------------------------:|:-----:|:------------------------:|:------:|
-| ramfree释放内存          | ✅   | luci-app-amlogic         | ✅    | FileBrowser文件浏览器    | ⏳     |
-| adguardhome              | ⏳   | lucky                    |  ⏳    | openlist2                | ⏳     |
+| ramfree释放内存          | ✅   | luci-app-amlogic         | ✅    | FileBrowser文件浏览器    |  ✅     |
+| adguardhome              |  ✅   | lucky                    |  ⏳    | openlist2                | ⏳     |
 | 其他                     | ⏳   |                          |        |                          |        |
 
 ✅ 支持 - ⏳ 计划中 - ⭕ 不支持
@@ -81,6 +77,7 @@
 - [istoreos](https://github.com/istoreos/istoreos)
 - [istoreos-builder](https://github.com/wukongdaily/istoreos-builder)
 - [amlogic-s9xxx-openwrt](https://github.com/Kwonelee/amlogic-s9xxx-openwrt)
+- [iStoreOS-Native](https://github.com/Kwonelee/iStoreOS-Native)
 
 ## 🙏 免责声明 [![](https://img.shields.io/badge/-免责声明-FFFFFF.svg)](#-免责声明-)
 - 📚 本固件仅供学习研究，严禁用于任何商业用途
