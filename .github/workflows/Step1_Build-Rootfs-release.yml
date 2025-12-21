@@ -130,10 +130,17 @@ jobs:
       with:
         tag_name: iStoreOS-${{ env.VERSION }}-RELEASE-${{ inputs.network_settings }}
         body: |
-          📌 **Version:     ** iStoreOS-${{ env.VERSION }}-RELEASE
-          🧩 **Includes:    ** Core system components, drivers, network tools, container support, LuCI interface, and plugins.
-          👤 **Username:    ** root | 🔒 **Password:** (none)
-          🌐 **Default IP:  ** ${{ inputs.network_settings == 'static' && inputs.ipaddr || 'DHCP (Single Port) / 192.168.10.1 (Multi-Port)' }}
+          📌 版本： iStoreOS-${{ env.VERSION }}-RELEASE
+
+          🧠 内核： Please Login to iStoreOS → System → Amlogic Service → Replace the Kernel
+          
+          🧩 集成： 包含了基础系统组件、驱动、网络工具、容器支持、LuCI界面及插件等
+          
+          👤 用户名： root
+          
+          🔒 密码： 无
+          
+          🌐 初始IP： ${{ inputs.network_settings == 'static' && inputs.ipaddr || '单网口 - 动态获取（从上级路由找寻）；多网口 - Eth0为WAN, IP：192.168.10.1' }}
 
           
         files: imagebuilder/bin/targets/armsr/armv8/*generic-rootfs.tar.gz
