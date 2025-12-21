@@ -1,4 +1,5 @@
 name: 💿 Step1_Build-Rootfs-release
+
 on:
   workflow_dispatch:
     inputs:
@@ -11,6 +12,19 @@ on:
           - '20251205'
           - '20251128'
           - '20251121'
+      
+      # 新增：将 VERSION 放入 inputs 变成下拉菜单
+      luci_version:
+        description: "选择luci版本"
+        required: true
+        default: "24.10.4"
+        type: choice
+        options:
+          - '24.10.0'
+          - '24.10.1'
+          - '24.10.2'
+          - '24.10.3'
+          - '24.10.4' 
       network_settings:
         description: "请选择初始网络配置"
         required: true
