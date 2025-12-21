@@ -78,7 +78,7 @@ jobs:
 
     - name: ⏬ 下载 ImageBuilder
       run: |
-        curl -L -o imagebuilder.tar.zst https://github.com/Arthur97172/iStoreOS-Actions/releases/download/iStoreOS-imagebuilder/${{ inputs.build_version }}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst
+        curl -L -o imagebuilder.tar.zst https://github.com/Arthur97172/iStoreOS-ARM/releases/download/iStoreOS-Imagebuilder/${{ inputs.build_version }}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst
         tar --use-compress-program=unzstd -xvf imagebuilder.tar.zst
         mv istoreos-imagebuilder-* imagebuilder
 
