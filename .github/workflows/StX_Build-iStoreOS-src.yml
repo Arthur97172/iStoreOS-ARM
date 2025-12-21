@@ -1,4 +1,4 @@
-name: 💿 StX_Build-iStoreOS-src
+name: 💿 StepX_Build-iStoreOS-src
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -260,7 +260,7 @@ jobs:
             
             🔒 密码： 无
             
-            🌐 IP： 单网口-动态获取（从上级路由找寻）；多网口-IP：192.168.100.1
+            🌐 IP： 单网口-动态获取（从上级路由找寻）；多网口-IP：192.168.10.1
           files: |
             ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
         env:
