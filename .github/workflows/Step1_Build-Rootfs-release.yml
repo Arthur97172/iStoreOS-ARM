@@ -63,27 +63,19 @@ jobs:
     - name: ⚙️ 设置IP、网关和版本号
       run: |
         CONFIG_PATH="./files/etc/uci-defaults/99-custom.sh"
-        echo "当前网络配置路径: $CONFIG_PATH"
         
-        # 1. 替换脚本中的版本描述（不再硬编码 24.10.4）
-        # 逻辑：匹配 iStoreOS 后面跟着的任何版本格式并替换
-        sed -i "s/iStoreOS [0-9.]*/iStoreOS ${{ env.VERSION }}/g" "$CONFIG_PATH"
+        # 精准替换占位符 __VERSION__ 为真实版本号
+        sed -i "s/__VERSION__/${{ env.VERSION }}/g" "$CONFIG_PATH"
         
-        # 2. 如果脚本里有“版本号”占位符，也进行替换
-        sed -i "s/版本号/${{ env.VERSION }}/g" "$CONFIG_PATH"
-        [ -f "./files/etc/banner" ] && sed -i "s/版本号/${{ env.VERSION }}/g" "./files/etc/banner"
-
-        # 3. 网络逻辑配置
+        # 处理网络逻辑
         if [ "${{ inputs.network_settings }}" = "static" ]; then
            echo "模式：静态IP (旁路由)"
            sed -i "s/192.168.10.1/${{ inputs.ipaddr }}/g" "$CONFIG_PATH"
            sed -i "/uci set network.lan.ipaddr/a \        uci set network.lan.gateway='${{ inputs.gateway }}'\n        uci set network.lan.dns='${{ inputs.gateway }}'" "$CONFIG_PATH"
-        else
-           echo "模式：DHCP / 默认模式 (主路由)"
         fi
 
-        echo "✅ 配置修改完成，输出预览："
-        cat "$CONFIG_PATH" | grep -E "VERSION|ipaddr|gateway|DESCRIPTION" || tail -n 10 "$CONFIG_PATH"
+        echo "✅ 配置修改完成："
+        tail -n 5 "$CONFIG_PATH"
 
     - name: ⏬ 安装依赖
       run: |
