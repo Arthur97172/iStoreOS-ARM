@@ -76,8 +76,8 @@
 
 ## 🎉 Thanks [![](https://img.shields.io/badge/-Thanks-FFFFFF.svg)](#-Thanks-)
 - [istoreos](https://github.com/istoreos/istoreos)
-- [istoreos-builder](https://github.com/wukongdaily/istoreos-builder)
-- [amlogic-s9xxx-openwrt](https://github.com/Kwonelee/amlogic-s9xxx-openwrt)
+- [Wukongdaily-istoreos-builder](https://github.com/wukongdaily/istoreos-builder)
+- [amlogic-s9xxx-openwrt](https://github.com/ophub/amlogic-s9xxx-openwrt)
 - [iStoreOS-Native](https://github.com/Kwonelee/iStoreOS-Native)
 
 ## 🙏 免责声明 [![](https://img.shields.io/badge/-免责声明-FFFFFF.svg)](#-免责声明-)
