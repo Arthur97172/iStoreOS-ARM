@@ -68,7 +68,10 @@
 | h6       | Vplus, Tanix-TX6, TQC-A01 |
 
 ## 🤗 项目截图 [![](https://img.shields.io/badge/-项目截图-FFFFFF.svg)](#-项目截图-)
-![screenshots](./files/screenshot/screenshot1.png)
+![screenshots](./files/screenshot/01.png)
+![screenshots](./files/screenshot/02.png)
+![screenshots](./files/screenshot/03.png)
+![screenshots](./files/screenshot/04.png)
 
 ## 🌟 Star戳一戳，好运加满！😆
 > **"点过 `Star` 的朋友，颜值与智慧双双在线！✨"**
