@@ -46,7 +46,7 @@ esac
 
 # 3. 网络拓扑配置
 if [ "$count" -eq 1 ]; then
-    # 单网口默认设为 DHCP（Workflow 会根据选择修改此逻辑）
+    # 单网口逻辑（Actions 选 static 时会被 sed 逻辑覆盖或补充）
     uci set network.lan.proto='dhcp'
     uci delete network.lan.ipaddr
     uci delete network.lan.netmask
@@ -71,8 +71,8 @@ elif [ "$count" -gt 1 ]; then
     fi
 fi
 
-# 4. LAN 静态 IP 设置 (此段会被 Workflow 的 sed 匹配并修改)
-# 注意：如果是单网口且用户在 Action 选了 DHCP，Workflow 会删掉下面这两行并把 proto 改为 dhcp
+# 4. LAN 静态 IP 设置占位区
+# 注意：这一块是 Workflow sed 匹配的核心区域
 uci set network.lan.proto='static'
 uci set network.lan.netmask='255.255.255.0'
 uci set network.lan.ipaddr='192.168.10.1'
@@ -84,12 +84,15 @@ uci commit network
 uci commit
 
 # 清理并还原 Banner
-cp /etc/banner1/banner /etc/
-rm -r /etc/banner1
+if [ -d "/etc/banner1" ]; then
+    cp /etc/banner1/banner /etc/
+    rm -rf /etc/banner1
+fi
 
 # 设置作者描述信息
+# 修改关键：将 "24.10.4" 替换为 "版本号" 占位符，或者保持为 iStoreOS 后面接任意内容
 FILE_PATH="/etc/openwrt_release"
-NEW_DESCRIPTION="iStoreOS 24.10.4"
+NEW_DESCRIPTION="iStoreOS 版本号"
 sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
 
 exit 0
