@@ -3,8 +3,8 @@
   <h1>基于imagebuilder与ophub打包工具的ARM构建iStoreOS固件</h1>
 
   <img src="https://img.shields.io/github/downloads/Arthur97172/iStoreOS-ARM/total.svg?style=for-the-badge&color=32C955"/>
-  <img src="https://img.shields.io/github/stars/Kwonelee/iStoreOS-Actions.svg?style=for-the-badge&color=orange"/>
-  <img src="https://img.shields.io/github/forks/Kwonelee/iStoreOS-Actions.svg?style=for-the-badge&color=ff69b4"/>
+  <img src="https://img.shields.io/github/stars/Arthur97172/iStoreOS-ARM.svg?style=for-the-badge&color=orange"/>
+  <img src="https://img.shields.io/github/forks/Arthur97172/iStoreOS-ARM.svg?style=for-the-badge&color=ff69b4"/>
   <img src="https://img.shields.io/github/license/Arthur97172/iStoreOS-ARM.svg?style=for-the-badge&color=blueviolet"/>
 
   [![](https://img.shields.io/badge/-目录:-696969.svg)](#readme)
