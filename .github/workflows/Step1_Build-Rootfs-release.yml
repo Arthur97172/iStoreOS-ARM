@@ -6,15 +6,13 @@ on:
       build_version:
         description: "请选择构建版本 (latest 为官网最新)"
         required: true
-        default: 'latest' # 默认设为 latest
+        default: 'latest'
         type: choice
         options:
           - 'latest'
           - '20251205'
           - '20251128'
           - '20251121'
-      
-      # 新增：将 VERSION 放入 inputs 变成下拉菜单
       luci_version:
         description: "选择luci版本"
         required: true
@@ -35,11 +33,11 @@ on:
           - 'static'
           - 'dhcp'
       ipaddr:
-        description: '请输入管理IP（选择static时必填）'
+        description: '请输入管理IP'
         required: true
         default: '192.168.10.1'
       gateway:
-        description: '请输入默认网关（选择static时必填）'
+        description: '请输入默认网关'
         required: true
         default: '192.168.10.1'
 
@@ -49,6 +47,10 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    # 关键：添加写入权限，解决 403 报错
+    permissions:
+      contents: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -63,28 +65,25 @@ jobs:
         CONFIG_PATH="./files/etc/uci-defaults/99-custom.sh"
         echo "当前网络配置路径: $CONFIG_PATH"
         
-        # 1. 替换版本号占位符
+        # 1. 替换脚本中的版本描述（不再硬编码 24.10.4）
+        # 逻辑：匹配 iStoreOS 后面跟着的任何版本格式并替换
+        sed -i "s/iStoreOS [0-9.]*/iStoreOS ${{ env.VERSION }}/g" "$CONFIG_PATH"
+        
+        # 2. 如果脚本里有“版本号”占位符，也进行替换
         sed -i "s/版本号/${{ env.VERSION }}/g" "$CONFIG_PATH"
         [ -f "./files/etc/banner" ] && sed -i "s/版本号/${{ env.VERSION }}/g" "./files/etc/banner"
 
-        # 2. 网络逻辑配置 (关键修改点：不再删除行，改用关键词替换)
+        # 3. 网络逻辑配置
         if [ "${{ inputs.network_settings }}" = "static" ]; then
            echo "模式：静态IP (旁路由)"
-           # 将脚本内默认的 192.168.10.1 替换为用户输入的 IP
            sed -i "s/192.168.10.1/${{ inputs.ipaddr }}/g" "$CONFIG_PATH"
-           
-           # 在设置 IP 的代码行后，动态插入网关和 DNS 设置
            sed -i "/uci set network.lan.ipaddr/a \        uci set network.lan.gateway='${{ inputs.gateway }}'\n        uci set network.lan.dns='${{ inputs.gateway }}'" "$CONFIG_PATH"
         else
            echo "模式：DHCP / 默认模式 (主路由)"
-           # 保持原脚本逻辑：单网口自动 DHCP，多网口保持 192.168.10.1
         fi
 
-        # 3. 替换脚本末尾的描述信息
-        sed -i "s/24.10.4/${{ env.VERSION }}/g" "$CONFIG_PATH"
-        
         echo "✅ 配置修改完成，输出预览："
-        cat "$CONFIG_PATH"
+        cat "$CONFIG_PATH" | grep -E "VERSION|ipaddr|gateway|DESCRIPTION" || tail -n 10 "$CONFIG_PATH"
 
     - name: ⏬ 安装依赖
       run: |
@@ -94,22 +93,12 @@ jobs:
     - name: ⏬ 下载 ImageBuilder
       run: |
         BUILD_VER="${{ inputs.build_version }}"
-        
-        # 逻辑判断
         if [ "$BUILD_VER" = "latest" ]; then
-          echo "🚀 模式：下载官网最新版 (latest)..."
           URL="https://fw0.koolcenter.com/iStoreOS/ib/armsr/istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
         else
-          echo "📂 模式：下载指定备份版本 ($BUILD_VER)..."
           URL="https://github.com/${{ github.repository }}/releases/download/iStoreOS-Imagebuilder/${BUILD_VER}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
         fi
-
-        echo "正在从以下地址下载: $URL"
-        
-        # 执行下载
-        curl -Lf -o imagebuilder.tar.zst "$URL" || { echo "❌ 下载失败，请检查版本 $BUILD_VER 的链接是否存在"; exit 1; }
-
-        # 解压并重命名
+        curl -Lf -o imagebuilder.tar.zst "$URL"
         tar --use-compress-program=unzstd -xvf imagebuilder.tar.zst
         mv istoreos-imagebuilder-* imagebuilder
 
@@ -120,7 +109,6 @@ jobs:
         find files/packages/ -name "*.ipk" -exec cp {} imagebuilder/packages/ \;
         
         mkdir -p imagebuilder/files/etc/{uci-defaults,banner1}
-        # 此时 cp 的是已经被上面 sed 修改过的 99-custom.sh
         cp files/etc/uci-defaults/99-custom.sh imagebuilder/files/etc/uci-defaults/
         cp files/etc/banner imagebuilder/files/etc/banner1/
         cp files/etc/rc.local imagebuilder/files/etc/
@@ -129,12 +117,10 @@ jobs:
         sed -i 's/# CONFIG_TARGET_ROOTFS_TARGZ is not set/CONFIG_TARGET_ROOTFS_TARGZ=y/' .config
         sed -i "s|CONFIG_TARGET_ROOTFS_SQUASHFS=.*|# CONFIG_TARGET_ROOTFS_SQUASHFS is not set|g" .config
         sed -i "s|CONFIG_TARGET_IMAGES_GZIP=.*|# CONFIG_TARGET_IMAGES_GZIP is not set|g" .config
-        tree -L 1
 
     - name: 🧱 构建iStoreOS-rootfs
       working-directory: ./imagebuilder
-      run: |
-        bash ./build24.sh
+      run: bash ./build24.sh
 
     - name: 🚀 上传到 Release
       uses: softprops/action-gh-release@v2.2.1
@@ -142,17 +128,9 @@ jobs:
         tag_name: iStoreOS-${{ env.VERSION }}-RELEASE-${{ inputs.network_settings }}
         body: |
           📌 版本： iStoreOS-${{ env.VERSION }}-RELEASE
-
-          🧠 内核： Please Login to iStoreOS → System → Amlogic Service → Replace the Kernel
-          
           🧩 集成： 包含了基础系统组件、驱动、网络工具、容器支持、LuCI界面及插件等
-          
-          👤 用户名： root
-          
-          🔒 密码： 无
-          
-          🌐 初始IP： ${{ inputs.network_settings == 'static' && inputs.ipaddr || '单网口 - 动态获取（从上级路由找寻）；多网口 - Eth0为WAN, IP：192.168.10.1' }}
-        files: |
-          imagebuilder/bin/targets/armsr/armv8/*generic-rootfs.tar.gz
+          👤 用户名： root | 🔒 密码： 无
+          🌐 初始IP： ${{ inputs.network_settings == 'static' && inputs.ipaddr || 'DHCP (单网口) / 192.168.10.1 (多网口)' }}
+        files: imagebuilder/bin/targets/armsr/armv8/*generic-rootfs.tar.gz
       env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
