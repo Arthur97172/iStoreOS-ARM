@@ -140,7 +140,7 @@ jobs:
           
           🔒 密码： 无
           
-          🌐 初始IP： ${{ inputs.network_settings == 'static' && inputs.ipaddr || '单网口 - 动态获取（从上级路由找寻）；多网口 - Eth0为WAN, IP：192.168.10.1' }}
+          🌐 初始IP： ${{ inputs.network_settings == inputs.ipaddr }}
 
           
         files: imagebuilder/bin/targets/armsr/armv8/*generic-rootfs.tar.gz
