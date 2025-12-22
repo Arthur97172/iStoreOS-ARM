@@ -140,7 +140,7 @@ jobs:
           
           🔒 密码： 无
           
-          🌐 初始IP： ${{ inputs.network_settings == inputs.ipaddr }}
+          🌐 初始IP： ${{ inputs.ipaddr }}
 
           
         files: imagebuilder/bin/targets/armsr/armv8/*generic-rootfs.tar.gz
