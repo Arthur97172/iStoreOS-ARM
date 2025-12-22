@@ -57,7 +57,7 @@ jobs:
 
     - name: ⚙️ 设置可执行权限
       run: | 
-        chmod +x arm64/build24.sh
+        chmod +x arm64/build_config.sh
         chmod +x shell/*.sh
 
     - name: ⚙️ 设置IP、网关和版本号
@@ -107,7 +107,7 @@ jobs:
 
     - name: ⏬ 复制并设置必备文件
       run: |
-        cp arm64/{build24.sh,Makefile} imagebuilder/
+        cp arm64/{build_config.sh,Makefile} imagebuilder/
         cp shell/{prepare-packages.sh,custom-packages.sh} imagebuilder/
         find files/packages/ -name "*.ipk" -exec cp {} imagebuilder/packages/ \;
         
@@ -123,7 +123,7 @@ jobs:
 
     - name: 🧱 构建iStoreOS-rootfs
       working-directory: ./imagebuilder
-      run: bash ./build24.sh
+      run: bash ./build_config.sh
 
     - name: 🚀 上传到 Release
       uses: softprops/action-gh-release@v2.2.1
