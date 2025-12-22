@@ -1,4 +1,4 @@
-name: 💿 Step2_Build-iStoreOS-ib
+name: 💿 Step2_Build-iStoreOS-ARM
 on:
   repository_dispatch:
   workflow_dispatch:
