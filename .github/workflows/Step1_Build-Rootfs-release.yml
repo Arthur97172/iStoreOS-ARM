@@ -130,6 +130,9 @@ jobs:
       with:
         tag_name: iStoreOS-ARM-${{ env.VERSION }}-RELEASE-${{ inputs.network_settings }}
         body: |
+
+          📡 ------------------------------路由器后台信息------------------------------
+          
           📌 版本： iStoreOS-ARM-${{ env.VERSION }}
 
           🧠 内核： Please Login to iStoreOS → System → Amlogic Service → Replace the Kernel
