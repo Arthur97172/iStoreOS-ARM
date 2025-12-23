@@ -107,7 +107,11 @@ jobs:
 
     - name: ⏬ 复制并设置必备文件
       run: |
+        # ⚠️ 确保这里复制了 repositories.conf
         cp arm64/{build_config.sh,Makefile} imagebuilder/
+        # 如果你的 repositories.conf 在根目录或 arm64 目录下，请确保路径正确
+        [ -f "repositories.conf" ] && cp repositories.conf imagebuilder/ || cp arm64/repositories.conf imagebuilder/
+        
         cp shell/{prepare-packages.sh,custom-packages.sh} imagebuilder/
         find files/packages/ -name "*.ipk" -exec cp {} imagebuilder/packages/ \;
         
@@ -124,7 +128,7 @@ jobs:
     - name: ⚙️ 动态获取 Kmod 哈希并更新配置
       run: |
         BUILD_VER="${{ env.VERSION }}"
-        # 确定基础路径
+        # 确保基础路径正确（ARM 架构路径）
         BASE_URL="https://downloads.openwrt.org/releases/${BUILD_VER}/targets/armsr/armv8/kmods/"
         
         echo "正在从 $BASE_URL 获取最新的内核哈希..."
@@ -134,15 +138,22 @@ jobs:
           FULL_KMOD_URL="${BASE_URL}${KMOD_DIR}"
           echo "✅ 成功匹配 kmods 路径: $FULL_KMOD_URL"
           
-          # 1. 替换版本占位符
-          sed -i "s|VERSION_PLACEHOLDER|${BUILD_VER}|g" imagebuilder/repositories.conf
+          # 1. 检查文件是否存在
+          TARGET_CONF="imagebuilder/repositories.conf"
+          if [ ! -f "$TARGET_CONF" ]; then
+            echo "❌ 错误: $TARGET_CONF 不存在，请检查 '复制必备文件' 步骤"
+            exit 1
+          fi
+
+          # 2. 替换版本号 (支持占位符 VERSION_PLACEHOLDER 或硬编码的 24.10.4)
+          sed -i "s|VERSION_PLACEHOLDER|${BUILD_VER}|g" "$TARGET_CONF"
+          sed -i "s|24.10.4|${BUILD_VER}|g" "$TARGET_CONF"
           
-          # 2. 替换 Kmod 整行 (最稳妥的方法：直接匹配包含 kmods 的行并整行重写)
-          sed -i "s|^src/gz openwrt_kmods.*|src/gz openwrt_kmods $FULL_KMOD_URL|g" imagebuilder/repositories.conf
+          # 3. 替换 Kmod 整行 (最稳妥：直接匹配包含 openwrt_kmods 的行并重写)
+          sed -i "s|^src/gz openwrt_kmods.*|src/gz openwrt_kmods $FULL_KMOD_URL|g" "$TARGET_CONF"
           
           echo "--- 更新后的配置文件内容 (预览) ---"
-          # 注意：cat 后面不加 grep，或者 grep 后面加 || true，防止因匹配不到而报错退出
-          cat imagebuilder/repositories.conf
+          cat "$TARGET_CONF"
         else
           echo "❌ 无法获取 Kmod 哈希，请检查官方源是否存在该版本: $BASE_URL"
           exit 1
