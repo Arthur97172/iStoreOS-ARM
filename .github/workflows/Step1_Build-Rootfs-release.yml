@@ -124,10 +124,10 @@ jobs:
     - name: ⚙️ 动态获取 Kmod 哈希并更新配置
       run: |
         BUILD_VER="${{ env.VERSION }}"
+        # 确定基础路径
         BASE_URL="https://downloads.openwrt.org/releases/${BUILD_VER}/targets/armsr/armv8/kmods/"
         
         echo "正在从 $BASE_URL 获取最新的内核哈希..."
-        # 抓取包含哈希值的文件夹名称 (例如 6.6.110-1-xxx...)
         KMOD_DIR=$(curl -sL $BASE_URL | grep -oE "[0-9.-]+-[a-f0-9]{32}" | head -n 1)
         
         if [ -n "$KMOD_DIR" ]; then
@@ -136,15 +136,17 @@ jobs:
           
           # 1. 替换版本占位符
           sed -i "s|VERSION_PLACEHOLDER|${BUILD_VER}|g" imagebuilder/repositories.conf
-          # 2. 替换 Kmod 完整路径
-          sed -i "s|https://.*/kmods/KMOD_PLACEHOLDER|$FULL_KMOD_URL|g" imagebuilder/repositories.conf
+          
+          # 2. 替换 Kmod 整行 (最稳妥的方法：直接匹配包含 kmods 的行并整行重写)
+          sed -i "s|^src/gz openwrt_kmods.*|src/gz openwrt_kmods $FULL_KMOD_URL|g" imagebuilder/repositories.conf
+          
+          echo "--- 更新后的配置文件内容 (预览) ---"
+          # 注意：cat 后面不加 grep，或者 grep 后面加 || true，防止因匹配不到而报错退出
+          cat imagebuilder/repositories.conf
         else
           echo "❌ 无法获取 Kmod 哈希，请检查官方源是否存在该版本: $BASE_URL"
           exit 1
         fi
-        
-        echo "--- 检查更新后的 repositories.conf ---"
-        cat imagebuilder/repositories.conf | grep "https"
 
     - name: 🧱 构建iStoreOS-rootfs
       working-directory: ./imagebuilder
