@@ -92,4 +92,9 @@ FILE_PATH="/etc/openwrt_release"
 NEW_DESCRIPTION="iStoreOS VERXXXX"
 sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
 
+# 写入自定义软件源到 customfeeds.conf
+cat >> /etc/opkg/customfeeds.conf <<EOF
+src/gz openwrt_kiddin9 https://dl.openwrt.ai/packages-24.10/x86_64/kiddin9/
+EOF
+
 exit 0
