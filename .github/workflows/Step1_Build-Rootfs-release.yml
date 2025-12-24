@@ -120,10 +120,15 @@ jobs:
         cp files/etc/banner imagebuilder/files/etc/banner1/
         cp files/etc/rc.local imagebuilder/files/etc/
         mkdir -p imagebuilder/files/etc/opkg
-        cp -r files/customfeeds/* imagebuilder/files/etc/opkg/ 2>/dev/null || true
-        # 验证信息
-        ls -l imagebuilder/files/etc/opkg/customfeeds.conf && echo "已拷贝 customfeeds.conf"
-       
+        
+        if [ -d files/customfeeds ] && [ "$(ls -A files/customfeeds 2>/dev/null)" ]; then
+            echo ">>> Copying custom opkg feeds"
+            cp -r files/customfeeds/* imagebuilder/files/etc/opkg/
+            ls -l imagebuilder/files/etc/opkg
+        else
+            echo ">>> No custom opkg feeds provided (this is OK)"
+        fi
+
         cd imagebuilder
         sed -i 's/# CONFIG_TARGET_ROOTFS_TARGZ is not set/CONFIG_TARGET_ROOTFS_TARGZ=y/' .config
         sed -i "s|CONFIG_TARGET_ROOTFS_SQUASHFS=.*|# CONFIG_TARGET_ROOTFS_SQUASHFS is not set|g" .config
