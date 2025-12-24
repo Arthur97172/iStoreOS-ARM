@@ -115,20 +115,11 @@ jobs:
         cp shell/{prepare-packages.sh,custom-packages.sh} imagebuilder/
         find files/packages/ -name "*.ipk" -exec cp {} imagebuilder/packages/ \;
         
-        mkdir -p imagebuilder/files/etc/{uci-defaults,banner1}
+        mkdir -p imagebuilder/files/etc/{uci-defaults,banner1,opkg}
         cp files/etc/uci-defaults/99-custom.sh imagebuilder/files/etc/uci-defaults/
         cp files/etc/banner imagebuilder/files/etc/banner1/
         cp files/etc/rc.local imagebuilder/files/etc/
-
-        mkdir -p imagebuilder/files/etc/opkg
-        
-        if [ -f iStoreOS-ARM/files/customfeeds/customfeeds.conf ]; then
-            cp iStoreOS-ARM/files/customfeeds/customfeeds.conf imagebuilder/files/etc/opkg/
-            echo "✅ customfeeds.conf 已加入固件"
-        else
-            echo "❌ 缺少 iStoreOS-ARM/files/customfeeds/customfeeds.conf"
-            exit 1
-        fi
+        cp /files/customfeeds/customfeeds.conf imagebuilder/files/etc/opkg/
 
         cd imagebuilder
         sed -i 's/# CONFIG_TARGET_ROOTFS_TARGZ is not set/CONFIG_TARGET_ROOTFS_TARGZ=y/' .config
