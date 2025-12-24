@@ -122,11 +122,11 @@ jobs:
 
         mkdir -p imagebuilder/files/etc/opkg
         
-        if [ -f files/customfeeds/customfeeds.conf ]; then
-            cp files/customfeeds/customfeeds.conf imagebuilder/files/etc/opkg/
+        if [ -f iStoreOS-ARM/files/customfeeds/customfeeds.conf ]; then
+            cp iStoreOS-ARM/files/customfeeds/customfeeds.conf imagebuilder/files/etc/opkg/
             echo "✅ customfeeds.conf 已加入固件"
         else
-            echo "❌ 缺少 files/customfeeds/customfeeds.conf"
+            echo "❌ 缺少 iStoreOS-ARM/files/customfeeds/customfeeds.conf"
             exit 1
         fi
 
