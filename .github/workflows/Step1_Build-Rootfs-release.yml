@@ -115,11 +115,14 @@ jobs:
         cp shell/{prepare-packages.sh,custom-packages.sh} imagebuilder/
         find files/packages/ -name "*.ipk" -exec cp {} imagebuilder/packages/ \;
         
-        mkdir -p imagebuilder/files/etc/{uci-defaults,banner1,opkg}
+        mkdir -p imagebuilder/files/etc/{uci-defaults,banner1}
         cp files/etc/uci-defaults/99-custom.sh imagebuilder/files/etc/uci-defaults/
         cp files/etc/banner imagebuilder/files/etc/banner1/
         cp files/etc/rc.local imagebuilder/files/etc/
-        cp /files/customfeeds/customfeeds.conf imagebuilder/files/etc/opkg/
+        mkdir -p imagebuilder/files/etc/opkg
+        cp -r files/customfeeds/* imagebuilder/files/etc/opkg/ 2>/dev/null || true
+        # 验证信息
+        ls -l imagebuilder/files/etc/opkg/customfeeds.conf && echo "已拷贝 customfeeds.conf"
 
         cd imagebuilder
         sed -i 's/# CONFIG_TARGET_ROOTFS_TARGZ is not set/CONFIG_TARGET_ROOTFS_TARGZ=y/' .config
