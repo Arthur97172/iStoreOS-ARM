@@ -121,6 +121,8 @@ jobs:
         cp files/etc/rc.local imagebuilder/files/etc/
         mkdir -p imagebuilder/files/etc/opkg
         cp -r files/customfeeds/* imagebuilder/files/etc/opkg/ 2>/dev/null || true
+        # 验证信息
+        ls -l imagebuilder/files/etc/opkg/customfeeds.conf && echo "已拷贝 customfeeds.conf"
        
         cd imagebuilder
         sed -i 's/# CONFIG_TARGET_ROOTFS_TARGZ is not set/CONFIG_TARGET_ROOTFS_TARGZ=y/' .config
