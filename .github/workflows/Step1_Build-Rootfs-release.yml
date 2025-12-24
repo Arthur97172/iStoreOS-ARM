@@ -119,14 +119,15 @@ jobs:
         cp files/etc/uci-defaults/99-custom.sh imagebuilder/files/etc/uci-defaults/
         cp files/etc/banner imagebuilder/files/etc/banner1/
         cp files/etc/rc.local imagebuilder/files/etc/
+
         mkdir -p imagebuilder/files/etc/opkg
         
-        if [ -d files/customfeeds ] && [ "$(ls -A files/customfeeds 2>/dev/null)" ]; then
-            echo ">>> Copying custom opkg feeds"
-            cp -r files/customfeeds/* imagebuilder/files/etc/opkg/
-            ls -l imagebuilder/files/etc/opkg
+        if [ -f files/customfeeds/customfeeds.conf ]; then
+            cp files/customfeeds/customfeeds.conf imagebuilder/files/etc/opkg/
+            echo "✅ customfeeds.conf 已加入固件"
         else
-            echo ">>> No custom opkg feeds provided (this is OK)"
+            echo "❌ 缺少 files/customfeeds/customfeeds.conf"
+            exit 1
         fi
 
         cd imagebuilder
