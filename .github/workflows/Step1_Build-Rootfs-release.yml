@@ -106,7 +106,7 @@ jobs:
         tar --use-compress-program=unzstd -xvf imagebuilder.tar.zst
         mv istoreos-imagebuilder-* imagebuilder
 
-    - name: ⏬ 复制并设置必备文件
+    - name: 🔄 复制并设置必备文件
       run: |
         # ⚠️ 确保这里复制了 repositories.conf
         cp arm64/{build_config.sh,Makefile} imagebuilder/
