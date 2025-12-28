@@ -1,7 +1,9 @@
 name:  💿 Sync iStoreOS Imagebuilder
 
 on:
-  workflow_dispatch:      
+  schedule:
+    - cron: '0 2 * * *' 
+  workflow_dispatch:     
 
 jobs:
   sync:
