@@ -68,8 +68,7 @@ jobs:
           files: ${{ steps.parse.outputs.filename }}
           body: |
             ## iStoreOS Imagebuilder 自动同步
-            - **源文件日期**: ${{ steps.parse.outputs.date }}
-            - **同步时间**: $(date +"%Y-%m-%d %H:%M:%S")
+            - **最新源文件更新日期**: ${{ steps.parse.outputs.date }}
             - **官方地址**: [Koolcenter](https://fw0.koolcenter.com/iStoreOS/ib/armsr/)
           make_latest: true
         env:
