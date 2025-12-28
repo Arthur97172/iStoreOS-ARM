@@ -2,8 +2,8 @@ name:  💿 Sync iStoreOS Imagebuilder
 
 on:
   schedule:
-    - cron: '0 2 * * *' # 每天定时运行
-  workflow_dispatch:      # 支持手动触发
+    - cron: '0 2 * * *' # 每天北京时间上午10:00左右运行
+  workflow_dispatch:      # 支持手动点击执行
 
 jobs:
   sync:
@@ -15,62 +15,55 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Parse Remote Page for Date
-        id: parse
+      - name: Get Remote Date and Check Local
+        id: process
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BASE_URL="https://fw0.koolcenter.com/iStoreOS/ib/armsr/"
-          TARGET_FILE="istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+          URL="https://fw0.koolcenter.com/iStoreOS/ib/armsr/istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
           
-          # 1. 下载网页源代码并提取对应文件的日期行
-          # 逻辑：匹配文件名，并提取它前后的 YYYY-MM-DD 格式日期
-          PAGE_CONTENT=$(curl -s $BASE_URL)
-          
-          # 使用 grep 匹配文件名所在的行，并提取 202x-xx-xx 格式的日期
-          RAW_DATE=$(echo "$PAGE_CONTENT" | grep "$TARGET_FILE" | grep -oP '\d{4}-\d{2}-\d{2}' | head -n 1)
+          # 1. 使用 curl 获取 Header，提取 Last-Modified 字段
+          # 例如: Last-Modified: Fri, 20 Dec 2024 08:30:15 GMT
+          RAW_DATE=$(curl -sI $URL | grep -i "last-modified" | cut -d':' -f2- | xargs)
           
           if [ -z "$RAW_DATE" ]; then
-            echo "错误：无法在页面上找到文件日期"
+            echo "错误：无法获取远程文件日期"
             exit 1
           fi
 
-          # 2. 去掉日期中的横杠，转换成 YYYYMMDD
-          RELEASE_DATE=$(echo "$RAW_DATE" | sed 's/-//g')
-          FILENAME="${RELEASE_DATE}-${TARGET_FILE}"
+          # 2. 格式化日期为 YYYYMMDD (例如 20241220)
+          RELEASE_DATE=$(date -d "$RAW_DATE" +%Y%m%d)
+          FILENAME="${RELEASE_DATE}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
           
-          echo "Parsed Date: $RELEASE_DATE"
-          echo "Target Filename: $FILENAME"
+          echo "远程发布日期: $RELEASE_DATE"
+          echo "准备文件名: $FILENAME"
 
-          # 3. 检查 GitHub Release 是否已存在
+          # 3. 检查 GitHub 上是否已存在此日期的文件
+          # 注意：这里会检查名为 iStoreOS-Imagebuilder 的 Release
           EXISTS=$(gh release view iStoreOS-Imagebuilder --json assets --jq ".assets[].name" | grep -w "$FILENAME" || true)
 
           if [ "$EXISTS" = "$FILENAME" ]; then
             echo "skip_upload=true" >> $GITHUB_OUTPUT
-            echo "文件 $FILENAME 已存在，跳过。"
+            echo "检测到相同日期的文件已存在，跳过本次任务。"
           else
             echo "skip_upload=false" >> $GITHUB_OUTPUT
             echo "filename=$FILENAME" >> $GITHUB_OUTPUT
-            echo "url=${BASE_URL}${TARGET_FILE}" >> $GITHUB_OUTPUT
+            echo "url=$URL" >> $GITHUB_OUTPUT
           fi
 
-      - name: Download and Upload
-        if: steps.parse.outputs.skip_upload == 'false'
+      - name: Download and Rename
+        if: steps.process.outputs.skip_upload == 'false'
+        run: |
+          curl -L ${{ steps.process.outputs.url }} -o ${{ steps.process.outputs.filename }}
+
+      - name: Upload to Release
+        if: steps.process.outputs.skip_upload == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: iStoreOS-Imagebuilder
-          files: |
-            ${{ steps.parse.outputs.filename }}
+          files: ${{ steps.process.outputs.filename }}
+          body: "自动同步 iStoreOS Imagebuilder。历史版本会在此持续累积。"
+          # 确保不会因为 Release 不存在而报错，它会自动创建一个
+          make_latest: true 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # 注意：这里需要先下载再上传，softprops 插件支持直接传本地文件
-        # 我们在下面增加一个下载步骤
-        
-      - name: Exec Download
-        if: steps.parse.outputs.skip_upload == 'false'
-        run: |
-          curl -L ${{ steps.parse.outputs.url }} -o ${{ steps.parse.outputs.filename }}
-          # 重新触发上传逻辑（或者整合到上一步）
-          gh release upload iStoreOS-Imagebuilder ${{ steps.parse.outputs.filename }} --clobber
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
