@@ -97,13 +97,35 @@ jobs:
     - name: ⏬ 下载 ImageBuilder
       run: |
         BUILD_VER="${{ inputs.build_version }}"
+        REPO="${{ github.repository }}"
+        TAG="iStoreOS-Imagebuilder"
+        TARGET_SUFFIX="istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+
         if [ "$BUILD_VER" = "latest" ]; then
-          URL="https://fw0.koolcenter.com/iStoreOS/ib/armsr/istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+          echo "🔍 正在从你的 GitHub Release 中寻找最新备份..."
+          
+          # 获取资产列表 -> 过滤出 imagebuilder 文件 -> 按名称倒序排序 -> 取第一个
+          LATEST_FILE=$(gh release view "$TAG" --repo "$REPO" --json assets --jq '.assets[].name' | grep "$TARGET_SUFFIX" | sort -r | head -n 1)
+          
+          if [ -z "$LATEST_FILE" ]; then
+            echo "❌ 错误：在 Release 标签 $TAG 下没找到任何备份文件，请检查同步 Workflow 是否成功运行过。"
+            exit 1
+          fi
+          
+          echo "✅ 找到最新的备份文件: $LATEST_FILE"
+          URL="https://github.com/$REPO/releases/download/$TAG/$LATEST_FILE"
         else
-          URL="https://github.com/${{ github.repository }}/releases/download/iStoreOS-Imagebuilder/${BUILD_VER}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+          echo "固定版本模式：准备下载 $BUILD_VER 备份"
+          URL="https://github.com/$REPO/releases/download/$TAG/${BUILD_VER}-${TARGET_SUFFIX}"
         fi
+
+        echo "正在下载: $URL"
+        # 使用 -f 确保如果文件不存在时报错停止，而不是下载一个错误页面
         curl -Lf -o imagebuilder.tar.zst "$URL"
+        
+        # 解压
         tar --use-compress-program=unzstd -xvf imagebuilder.tar.zst
+        # 这里的解压目录匹配官方默认生成的文件夹名
         mv istoreos-imagebuilder-* imagebuilder
 
     - name: 🔄 复制并设置必备文件
