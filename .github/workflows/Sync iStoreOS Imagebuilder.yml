@@ -1,7 +1,7 @@
 name:  💿 Sync iStoreOS Imagebuilder
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:      
 
 jobs:
   sync:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Parse Remote Page for Date
+      - name: Parse Remote Date and Check Local
         id: parse
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -21,61 +21,54 @@ jobs:
           BASE_URL="https://fw0.koolcenter.com/iStoreOS/ib/armsr/"
           TARGET_FILE="istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
           
-          # 下载源码并查找目标文件所在的行
+          # 1. 获取包含文件名的行
           LINE_CONTENT=$(curl -sL $BASE_URL | grep "$TARGET_FILE" | head -n 1)
           
-          # 提取该行中的日期字符串
-          # 这里的逻辑是寻找 202x 开头的日期，或者包含横杠/冒号的时间字符串
+          # 2. 提取日期 (YYYY-MM-DD)
           RAW_DATE=$(echo "$LINE_CONTENT" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || echo "")
           
-          # 如果上面没匹配到，尝试匹配网页常见的 26-Dec-2024 这种格式
           if [ -z "$RAW_DATE" ]; then
-             RAW_DATE=$(echo "$LINE_CONTENT" | grep -oE '[0-9]{2}-[A-Za-z]{3}-[0-9]{4}' || echo "")
-          fi
-
-          if [ -z "$RAW_DATE" ]; then
-            echo "--- 调试信息：输出该行源码 ---"
-            echo "$LINE_CONTENT"
-            echo "错误：无法在页面行内识别日期格式"
+            echo "::error::无法在页面行内识别日期格式"
             exit 1
           fi
 
-          # 统一转换为 YYYYMMDD
+          # 3. 格式化并生成目标文件名
           RELEASE_DATE=$(date -d "$RAW_DATE" +%Y%m%d)
           FILENAME="${RELEASE_DATE}-${TARGET_FILE}"
           
-          echo "Parsed Date: $RELEASE_DATE"
-          echo "Target Filename: $FILENAME"
+          echo "date=$RELEASE_DATE" >> $GITHUB_OUTPUT
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "url=${BASE_URL}${TARGET_FILE}" >> $GITHUB_OUTPUT
 
-          # 检查是否存在 (由于你的 Tag 是 iStoreOS-Imagebuilder)
-          # 注意：如果第一次运行，Release 可能不存在，加 || true 容错
+          # 4. 检查是否已存在
           EXISTS=$(gh release view iStoreOS-Imagebuilder --json assets --jq ".assets[].name" 2>/dev/null | grep -w "$FILENAME" || true)
 
           if [ "$EXISTS" = "$FILENAME" ]; then
             echo "skip_upload=true" >> $GITHUB_OUTPUT
+            echo "✅ 文件 $FILENAME 已存在，无需重复同步。"
           else
             echo "skip_upload=false" >> $GITHUB_OUTPUT
-            echo "filename=$FILENAME" >> $GITHUB_OUTPUT
-            echo "url=${BASE_URL}${TARGET_FILE}" >> $GITHUB_OUTPUT
+            echo "🚀 发现新版本或缺失版本: $FILENAME"
           fi
-          
-      - name: Download and Upload
+
+      - name: Download File
+        if: steps.parse.outputs.skip_upload == 'false'
+        run: |
+          echo "正在从官网拉取: ${{ steps.parse.outputs.filename }}"
+          # 使用 -C - 开启断点续传，防止大文件下载中断
+          curl -L -C - "${{ steps.parse.outputs.url }}" -o "${{ steps.parse.outputs.filename }}"
+
+      - name: Upload to Release
         if: steps.parse.outputs.skip_upload == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: iStoreOS-Imagebuilder
-          files: |
-            ${{ steps.parse.outputs.filename }}
+          files: ${{ steps.parse.outputs.filename }}
+          body: |
+            ## iStoreOS Imagebuilder 自动同步
+            - **源文件日期**: ${{ steps.parse.outputs.date }}
+            - **同步时间**: $(date +"%Y-%m-%d %H:%M:%S")
+            - **官方地址**: [Koolcenter](https://fw0.koolcenter.com/iStoreOS/ib/armsr/)
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # 注意：这里需要先下载再上传，softprops 插件支持直接传本地文件
-        # 我们在下面增加一个下载步骤
-        
-      - name: Exec Download
-        if: steps.parse.outputs.skip_upload == 'false'
-        run: |
-          curl -L ${{ steps.parse.outputs.url }} -o ${{ steps.parse.outputs.filename }}
-          # 重新触发上传逻辑（或者整合到上一步）
-          gh release upload iStoreOS-Imagebuilder ${{ steps.parse.outputs.filename }} --clobber
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
