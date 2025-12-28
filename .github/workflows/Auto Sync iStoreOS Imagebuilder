@@ -1,0 +1,59 @@
+name: Auto Sync iStoreOS Imagebuilder
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 每天凌晨 2:00 运行（避开高峰）
+  workflow_dispatch:      # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 必须赋予写入权限以更新 Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Remote and Local Version
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          URL="https://fw0.koolcenter.com/iStoreOS/ib/armsr/istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+          
+          # 1. 获取远程文件日期
+          LAST_MODIFIED=$(curl -sI $URL | grep -i "last-modified" | cut -d':' -f2- | xargs)
+          RELEASE_DATE=$(date -d "$LAST_MODIFIED" +%Y%m%d)
+          FILENAME="${RELEASE_DATE}-istoreos-imagebuilder-armsr-armv8.Linux-x86_64.tar.zst"
+          
+          echo "Remote file date: $RELEASE_DATE"
+          echo "Target filename: $FILENAME"
+
+          # 2. 检查 GitHub Release 中是否已存在该文件
+          # 列出该 tag 下的所有文件名，并搜索是否存在当前文件名
+          EXISTS=$(gh release view iStoreOS-Imagebuilder --json assets --jq ".assets[].name" | grep -w "$FILENAME" || true)
+
+          if [ "$EXISTS" = "$FILENAME" ]; then
+            echo "status=skip" >> $GITHUB_OUTPUT
+            echo "File $FILENAME already exists. Skipping upload."
+          else
+            echo "status=download" >> $GITHUB_OUTPUT
+            echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+            echo "url=$URL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download File
+        if: steps.check.outputs.status == 'download'
+        run: |
+          curl -L ${{ steps.check.outputs.url }} -o ${{ steps.check.outputs.filename }}
+
+      - name: Upload to GitHub Release
+        if: steps.check.outputs.status == 'download'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: iStoreOS-Imagebuilder
+          files: ${{ steps.check.outputs.filename }}
+          # append_body: true # 可选：是否在 Release 说明中追加信息
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
