@@ -89,7 +89,7 @@ jobs:
         echo "✅ 配置修改完成，输出预览："
         cat "$CONFIG_PATH"
 
-    - name: 🔨 安装依赖
+    - name: 🛠️ 安装依赖
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential libncurses5-dev zstd curl unzip tree
