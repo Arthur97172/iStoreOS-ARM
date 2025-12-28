@@ -2,8 +2,8 @@ name:  💿 Sync iStoreOS Imagebuilder
 
 on:
   schedule:
-    - cron: '0 2 * * *' 
-  workflow_dispatch:     
+    - cron: '0 19 * * 2' # 每周三北京时间凌晨 03:00 自动运行
+  workflow_dispatch:
 
 jobs:
   sync:
