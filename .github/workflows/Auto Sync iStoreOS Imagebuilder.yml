@@ -1,4 +1,4 @@
-name: Auto Sync iStoreOS Imagebuilder
+name:  💿 Sync iStoreOS Imagebuilder
 
 on:
   schedule:
