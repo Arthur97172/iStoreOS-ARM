@@ -1114,10 +1114,23 @@ if echo "$PACKAGES" | grep -q "luci-app-nikki"; then
     # 创建目录
     mkdir -p files/etc/nikki/run/
     # 下载 GeoIP and GeoSite 数据库
-    wget -q https://github.com/MetaCubeX/meta-rules-dat/releases/latest/download/geoip.dat -O files/etc/nikki/run/GeoIP.dat
-    wget -q https://github.com/MetaCubeX/meta-rules-dat/releases/latest/download/geosite.dat -O files/etc/nikki/run/GeoSite.dat
-    chmod 755 files/etc/nikki/run/*
-    echo "✅ nikki预装GeoData 数据库完成！"
+    wget -q https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat -O files/etc/nikki/run/geoip.dat
+    wget -q https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat -O files/etc/nikki/run/geosite.dat
+    wget -q https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb -O files/etc/nikki/run/country.mmdb
+    wget -q https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb -O files/etc/nikki/run/GeoLite2-ASN.mmdb
+    #chmod 755 files/etc/nikki/run/*
+    # 下载 Zashboard
+    wget -q https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip -O /tmp/dist-cdn-fonts.zip
+    # 解压 Zashboard
+    rm -rf files/etc/nikki/run/ui/*
+    mkdir -p files/etc/nikki/run/ui
+    unzip -qo /tmp/dist-cdn-fonts.zip -d files/etc/nikki/run/ui/
+    # 删除临时文件
+    rm -f /tmp/dist-cdn-fonts.zip
+    # 设置目录和文件权限
+    find files/etc/nikki/run -type d -exec chmod 755 {} \;
+    find files/etc/nikki/run -type f -exec chmod 644 {} \;
+    echo "✅ Nikki 预装 GeoData + Zashboard 完成！"
 else
     echo "⚪️ 未选择 luci-app-nikki"
 fi
