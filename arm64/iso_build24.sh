@@ -1120,13 +1120,17 @@ if echo "$PACKAGES" | grep -q "luci-app-nikki"; then
     wget -q https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb -O files/etc/nikki/run/GeoLite2-ASN.mmdb
     #chmod 755 files/etc/nikki/run/*
     # 下载 Zashboard
-    wget -q https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip -O /tmp/dist-cdn-fonts.zip
+    wget -q https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip -O /tmp/dist.zip
     # 解压 Zashboard
     rm -rf files/etc/nikki/run/ui/*
     mkdir -p files/etc/nikki/run/ui
-    unzip -qo /tmp/dist-cdn-fonts.zip -d files/etc/nikki/run/ui/
+    # 解压 Zashboard到临时文件夹
+    unzip -qo /tmp/dist.zip -d /tmp/zashboard
+    # 将 dist 目录中的所有内容复制到 Nikki UI 目录
+    cp -a /tmp/zashboard/dist/. files/etc/nikki/run/ui/
     # 删除临时文件
-    rm -f /tmp/dist-cdn-fonts.zip
+    rm -rf /tmp/zashboard
+    rm -f /tmp/dist.zip
     # 设置目录和文件权限
     find files/etc/nikki/run -type d -exec chmod 755 {} \;
     find files/etc/nikki/run -type f -exec chmod 644 {} \;
